@@ -18,3 +18,48 @@ $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost
 
 /etc/init.d/mysql stop
 
+# setup etherpad
+tar -zxf $SRC/Pita-etherpad-lite-*.tar.gz -C /opt
+mv /opt/Pita-etherpad-lite-* $NODEAPP
+rm $SRC/Pita-etherpad-lite-*.tar.gz
+
+tar -zxf $SRC/node_modules.tar.gz -C $NODEAPP
+rm $SRC/node_modules.tar.gz
+
+mv $SRC/jquery.js.gz $NODEAPP/static/js/jquery.js.gz
+gzip -d $NODEAPP/static/js/jquery.js.gz
+
+for f in index pad timeslider; do
+    cp $NODEAPP/static/custom/js.template $NODEAPP/static/custom/$f.js
+    cp $NODEAPP/static/custom/css.template $NODEAPP/static/custom/$f.css
+done
+
+cat >$NODEAPP/settings.json<<EOF
+{
+  "ip": "127.0.0.1",
+  "port" : 8000,
+
+  "dbType" : "mysql",
+  "dbSettings" : {
+                   "user"    : "$DB_USER",
+                   "host"    : "localhost",
+                   "password": "$DB_PASS",
+                   "database": "$DB_NAME"
+                 },
+
+  "defaultPadText" : "Welcome to TurnKey Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
+
+  "requireSession" : false,
+  "editOnly" : false,
+  "minify" : true,
+  "maxAge" : 21600000, // 6 hours
+  "abiword" : null,
+  "loglevel": "WARN"
+}
+EOF
+
+echo -n $(mcookie) > $NODEAPP/APIKEY.txt
+
+mkdir -p $NODEAPP/var
+chown -R nodejs:nodejs $NODEAPP/var
+
