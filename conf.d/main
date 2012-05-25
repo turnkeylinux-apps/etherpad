@@ -1,0 +1,9 @@
+#!/bin/sh -ex
+
+DB_NAME=etherpad
+DB_USER=etherpad
+DB_PASS=$(mcookie)
+
+SRC=/usr/local/src
+NODEAPP=/opt/etherpad
+
