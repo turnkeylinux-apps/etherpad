@@ -19,6 +19,11 @@ $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost
 /etc/init.d/mysql stop
 
 # setup etherpad
+cat >/etc/default/nodejs<<EOF
+# sourced by /etc/init.d/nodejs
+NODEJS_EXEC=$NODEAPP/bin/safeRun.sh
+EOF
+
 tar -zxf $SRC/Pita-etherpad-lite-*.tar.gz -C /opt
 mv /opt/Pita-etherpad-lite-* $NODEAPP
 rm $SRC/Pita-etherpad-lite-*.tar.gz
