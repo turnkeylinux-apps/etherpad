@@ -4,8 +4,7 @@ DB_NAME=etherpad
 DB_USER=etherpad
 DB_PASS=$(mcookie)
 
-SRC=/usr/local/src
-NODEAPP=/opt/etherpad
+NODEAPP=/opt/etherpad-lite
 
 # setup mysql for etherpad
 /etc/init.d/mysql start
@@ -18,27 +17,18 @@ $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost
 
 /etc/init.d/mysql stop
 
+# download etherpad and install dependencies
+[ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
+
+cd $(dirname $NODEAPP)
+git clone https://github.com/ether/etherpad-lite.git
+
+cd $NODEAPP
+./bin/installDeps.sh
+
+unset HTTP_PROXY
+
 # setup etherpad
-cat >/etc/default/nodejs<<EOF
-# sourced by /etc/init.d/nodejs
-NODEJS_EXEC=$NODEAPP/bin/safeRun.sh
-EOF
-
-tar -zxf $SRC/Pita-etherpad-lite-*.tar.gz -C /opt
-mv /opt/Pita-etherpad-lite-* $NODEAPP
-rm $SRC/Pita-etherpad-lite-*.tar.gz
-
-tar -zxf $SRC/node_modules.tar.gz -C $NODEAPP
-rm $SRC/node_modules.tar.gz
-
-mv $SRC/jquery.js.gz $NODEAPP/static/js/jquery.js.gz
-gzip -d $NODEAPP/static/js/jquery.js.gz
-
-for f in index pad timeslider; do
-    cp $NODEAPP/static/custom/js.template $NODEAPP/static/custom/$f.js
-    cp $NODEAPP/static/custom/css.template $NODEAPP/static/custom/$f.css
-done
-
 cat >$NODEAPP/settings.json<<EOF
 {
   "ip": "127.0.0.1",
@@ -46,11 +36,11 @@ cat >$NODEAPP/settings.json<<EOF
 
   "dbType" : "mysql",
   "dbSettings" : {
-                   "user"    : "$DB_USER",
-                   "host"    : "localhost",
-                   "password": "$DB_PASS",
-                   "database": "$DB_NAME"
-                 },
+    "user"    : "$DB_USER",
+    "host"    : "localhost",
+    "password": "$DB_PASS",
+    "database": "$DB_NAME"
+  },
 
   "defaultPadText" : "Welcome to TurnKey Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
 
@@ -64,6 +54,11 @@ cat >$NODEAPP/settings.json<<EOF
 EOF
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
+
+cat >/etc/default/nodejs<<EOF
+# sourced by /etc/init.d/nodejs
+NODEJS_EXEC=$NODEAPP/bin/safeRun.sh
+EOF
 
 mkdir -p $NODEAPP/var
 chown -R nodejs:nodejs $NODEAPP/var
