@@ -55,6 +55,9 @@ EOF
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 
+echo -n "done" > $NODEAPP/src/.ep_initialized
+chown nodejs:nodejs $NODEAPP/src/.ep_initialized
+
 cat >/etc/default/nodejs<<EOF
 # sourced by /etc/init.d/nodejs
 NODEJS_EXEC=$NODEAPP/bin/safeRun.sh
