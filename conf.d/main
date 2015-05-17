@@ -54,6 +54,8 @@ cat >$NODEAPP/settings.json<<EOF
 EOF
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
+echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
+chown nodejs:nodejs $NODEAPP/SESSIONKEY.txt
 
 echo -n "done" > $NODEAPP/src/.ep_initialized
 chown nodejs:nodejs $NODEAPP/src/.ep_initialized
