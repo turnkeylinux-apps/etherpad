@@ -32,23 +32,30 @@ unset HTTP_PROXY
 cat >$NODEAPP/settings.json<<EOF
 {
   "ip": "127.0.0.1",
-  "port" : 8000,
+  "port": 8000,
 
-  "dbType" : "mysql",
-  "dbSettings" : {
+  "dbType": "mysql",
+  "dbSettings": {
     "user"    : "$DB_USER",
     "host"    : "localhost",
     "password": "$DB_PASS",
     "database": "$DB_NAME"
   },
 
-  "defaultPadText" : "Welcome to TurnKey Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
+  "users": {
+    "admin": {
+      "password": "turnkey",
+      "is_admin": "true"
+    }
+  },
 
-  "requireSession" : false,
-  "editOnly" : false,
-  "minify" : true,
-  "maxAge" : 21600000, // 6 hours
-  "abiword" : null,
+  "defaultPadText": "Welcome to TurnKey Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
+
+  "requireSession": false,
+  "editOnly": false,
+  "minify": true,
+  "maxAge": 21600000, // 6 hours
+  "abiword": null,
   "loglevel": "WARN"
 }
 EOF
@@ -66,5 +73,6 @@ NODEJS_EXEC=$NODEAPP/bin/safeRun.sh
 EOF
 
 mkdir -p $NODEAPP/var
+chown nodejs:nodejs $NODEAPP
 chown -R nodejs:nodejs $NODEAPP/var
-
+chown -R nodejs:nodejs $NODEAPP/node_modules
