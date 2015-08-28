@@ -6,6 +6,7 @@ Option:
 
 """
 
+from os import system
 import sys
 import getopt
 import string
@@ -39,7 +40,7 @@ def main():
             "Etherpad Password",
             "Enter new password for the Etherpad 'admin' account.")
 
-    system("sed -i '/admin/,+1 s|\\(\"password":\\).*|\\1 \"%s\"|' /opt/etherpad-lite/settings.json" % password)
+    system("sed -i '/admin/,+1 s|\\(\"password\":\\).*|\\1 \"%s\",|' /opt/etherpad-lite/settings.json" % password)
 
 if __name__ == "__main__":
     main()
