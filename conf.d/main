@@ -21,7 +21,16 @@ $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
 cd $(dirname $NODEAPP)
-git clone https://github.com/ether/etherpad-lite.git
+git clone --depth=1 https://github.com/ether/etherpad-lite.git
+
+# temporary fix for invalid version check
+cd etherpad-lite
+git remote add Gared https://github.com/Gared/etherpad-lite.git
+git fetch Gared support_node_4
+git config user.email 'root@tkldev'
+git config user.name 'TKLDev user'
+git cherry-pick bf7930fccb37ac6d2b40115ff41c2c0b70fb1061
+cd ..
 
 cd $NODEAPP
 ./bin/installDeps.sh
