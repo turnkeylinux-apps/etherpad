@@ -21,7 +21,7 @@ $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
 cd $(dirname $NODEAPP)
-git clone https://github.com/ether/etherpad-lite.git
+git clone --depth=1 https://github.com/ether/etherpad-lite.git
 
 cd $NODEAPP
 ./bin/installDeps.sh
