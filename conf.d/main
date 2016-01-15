@@ -22,7 +22,7 @@ $MYSQL_BATCH --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE ut
 cd $(dirname $NODEAPP)
 git clone https://github.com/ether/etherpad-lite.git
 
-chown -R nodejs:nodejs $NODEAPP
+chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 
 unset HTTP_PROXY
@@ -61,10 +61,10 @@ EOF
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
-chown nodejs:nodejs $NODEAPP/SESSIONKEY.txt
+chown node:node $NODEAPP/SESSIONKEY.txt
 
 echo -n "done" > $NODEAPP/src/.ep_initialized
-chown nodejs:nodejs $NODEAPP/src/.ep_initialized
+chown node:node $NODEAPP/src/.ep_initialized
 
 su node -lc "cd $NODEAPP && pm2 start ./bin/run.sh"
 
@@ -76,7 +76,7 @@ su node -lc 'pm2 kill'
 $MYSQL_BATCH --execute "ALTER TABLE $DB_NAME.store CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin; "
 
 mkdir -p $NODEAPP/var
-chown -R nodejs:nodejs $NODEAPP/var
-chown -R nodejs:nodejs $NODEAPP/node_modules
+chown -R node:node $NODEAPP/var
+chown -R node:node $NODEAPP/node_modules
 
 service mysql stop
