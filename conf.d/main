@@ -7,24 +7,23 @@ DB_PASS=$(mcookie)
 NODEAPP=/opt/etherpad-lite
 
 # setup mysql for etherpad
-/etc/init.d/mysql start
+service mysql start
 
 MYSQL_BATCH="mysql --user=root --password=$MYSQL_PASS --batch"
 MYSQL_ADMIN="mysqladmin --user=root --password=$MYSQL_PASS"
 
 $MYSQL_ADMIN create $DB_NAME
 $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost identified by '$DB_PASS'; flush privileges;"
-
-/etc/init.d/mysql stop
+$MYSQL_BATCH --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;"
 
 # download etherpad and install dependencies
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
 cd $(dirname $NODEAPP)
-git clone https://github.com/ether/etherpad-lite.git
+git clone --depth=1 https://github.com/ether/etherpad-lite.git
 
-cd $NODEAPP
-./bin/installDeps.sh
+chown -R node:node $NODEAPP
+su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 
 unset HTTP_PROXY
 
@@ -62,17 +61,22 @@ EOF
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
-chown nodejs:nodejs $NODEAPP/SESSIONKEY.txt
+chown node:node $NODEAPP/SESSIONKEY.txt
 
 echo -n "done" > $NODEAPP/src/.ep_initialized
-chown nodejs:nodejs $NODEAPP/src/.ep_initialized
+chown node:node $NODEAPP/src/.ep_initialized
 
-cat >/etc/default/nodejs<<EOF
-# sourced by /etc/init.d/nodejs
-NODEJS_EXEC=$NODEAPP/bin/safeRun.sh
-EOF
+su node -lc "cd $NODEAPP && pm2 start ./bin/run.sh"
+
+sleep 10
+
+su node -lc 'pm2 dump'
+su node -lc 'pm2 kill'
+
+$MYSQL_BATCH --execute "ALTER TABLE $DB_NAME.store CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin; "
 
 mkdir -p $NODEAPP/var
-chown nodejs:nodejs $NODEAPP
-chown -R nodejs:nodejs $NODEAPP/var
-chown -R nodejs:nodejs $NODEAPP/node_modules
+chown -R node:node $NODEAPP/var
+chown -R node:node $NODEAPP/node_modules
+
+service mysql stop
