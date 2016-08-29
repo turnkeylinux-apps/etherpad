@@ -28,6 +28,17 @@ and on top of that:
 - Includes postfix MTA (bound to localhost) for sending of email.  Also
   includes webmin postfix module for convenience.
 
+**Note**: because of an upstream `bug`_, the commands `pm2 dump` and
+`pm2 save` will not work by default. The solution is as follows:
+
+```console
+root@etherpad ~# chattr -i /home/node/.pm2/dump.pm2
+root@etherpad ~# su - node
+node@etherpad:~$ pm2 dump
+node@etherpad:~$ exit
+root@etherpad ~# chattr +i /home/node/.pm2/dump.pm2
+```
+
 Credentials *(passwords set at first boot)*
 -------------------------------------------
 
@@ -36,3 +47,4 @@ Credentials *(passwords set at first boot)*
 
 .. _Etherpad Lite: http://etherpad.org/
 .. _TurnKey Core: https://www.turnkeylinux.org/core
+.. _bug: https://github.com/Unitech/pm2/issues/1035

@@ -3,6 +3,9 @@
 
 . /etc/default/inithooks
 
+# until https://github.com/Unitech/pm2/issues/1035 is completely fixed
+chattr +i /home/node/.pm2/dump.pm2
+
 [ -e $INITHOOKS_CONF ] && . $INITHOOKS_CONF
 $INITHOOKS_PATH/bin/etherpad.py --pass="$APP_PASS"
 
