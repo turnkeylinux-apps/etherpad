@@ -1,3 +1,14 @@
+turnkey-etherpad-14.2 (1) turnkey; urgency=low
+
+  * Updated Etherpad to latest upstream.
+
+  * Installed security updates.
+
+  * Note: Please refer to turnkey-core's changelog for changes common to all
+    appliances. Here we only describe changes specific to this appliance.
+
+ -- Jeremy Davis <jeremy@turnkeylinux.org>  Thu, 20 Apr 2017 14:14:18 +1000
+
 turnkey-etherpad-14.1 (1) turnkey; urgency=low
 
   * Etherpad:
