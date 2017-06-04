@@ -10,7 +10,7 @@
 ### END INIT INFO
 
 dir="/opt/etherpad-lite"
-start_cmd="cd $dir; npm start --production"
+start_cmd="cd $dir; bin/run.sh"
 user="node"
 
 name=`basename $0`

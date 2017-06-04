@@ -10,6 +10,7 @@ from os import system
 import sys
 import getopt
 import string
+import json
 
 from dialog_wrapper import Dialog
 
@@ -40,7 +41,13 @@ def main():
             "Etherpad Password",
             "Enter new password for the Etherpad 'admin' account.")
 
-    system("sed -i '/admin/,+1 s|\\(\"password\":\\).*|\\1 \"%s\",|' /opt/etherpad-lite/settings.json" % password)
+    with open('/opt/etherpad-lite/settings.json') as fob:
+        settings = json.load(fob)
+
+    settings['users']['admin']['password'] = password    
+
+    with open('/opt/etherpad-lite/settings.json', 'w') as fob:
+        json.dump(settings, fob)
 
 if __name__ == "__main__":
     main()

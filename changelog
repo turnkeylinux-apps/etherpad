@@ -1,3 +1,11 @@
+turnkey-etherpad-14.2 (1) turnkey; urgency=low
+
+  * Updated Etherpad to latest upstream version
+
+  * Dummy message
+
+ -- Stefan Davis <stefan@turnkeylinux.org>  Fri, 02 Jun 2017 07:28:48 +1000
+
 turnkey-etherpad-14.1 (1) turnkey; urgency=low
 
   * Etherpad:
