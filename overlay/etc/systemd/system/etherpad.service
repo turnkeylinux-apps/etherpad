@@ -8,7 +8,7 @@ WorkingDirectory=/opt/etherpad-lite
 User=node
 Group=node  
 Environment=NODE_ENV=production
-ExecStart=cd /opt/etherpad-lite;/opt/etherpad-lite/bin/run.sh
+ExecStart=/opt/etherpad-lite/bin/run.sh
 ExecStop=/bin/kill -TERM $MAINPID  
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure

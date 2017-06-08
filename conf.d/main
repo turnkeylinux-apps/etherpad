@@ -22,13 +22,14 @@ $MYSQL_BATCH --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE ut
 cd $(dirname $NODEAPP)
 git clone --depth=1 https://github.com/ether/etherpad-lite.git
 
+
 chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 
 unset HTTP_PROXY
 
 # setup etherpad
-cat >$NODEAPP/settings.json<<EOF
+cat >$NODEAPP/settings.json.example<<EOF
 {
   "ip": "127.0.0.1",
   "port": 8000,
@@ -44,7 +45,7 @@ cat >$NODEAPP/settings.json<<EOF
   "users": {
     "admin": {
       "password": "turnkey",
-      "is_admin": "true"
+      "is_admin": true
     }
   },
 
@@ -58,6 +59,9 @@ cat >$NODEAPP/settings.json<<EOF
   "loglevel": "WARN"
 }
 EOF
+# get settings without comments, makes editing in etherpad-admin
+# cleaner, preserved commented version as example
+sed 's|//.*||' $NODEAPP/settings.json.example > $NODEAPP/settings.json
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
@@ -66,14 +70,11 @@ chown node:node $NODEAPP/SESSIONKEY.txt
 echo -n "done" > $NODEAPP/src/.ep_initialized
 chown node:node $NODEAPP/src/.ep_initialized
 
-#su node -lc "cd $NODEAPP && pm2 start ./bin/run.sh"
 service etherpad start
 
 while :; do service etherpad status && break; sleep 1; done
 
 service etherpad stop
-
-#$MYSQL_BATCH --execute "ALTER TABLE $DB_NAME.store CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin; "
 
 mkdir -p $NODEAPP/var
 chown -R node:node $NODEAPP/var
