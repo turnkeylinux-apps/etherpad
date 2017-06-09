@@ -1,0 +1,24 @@
+[Unit]
+Description=Etherpad Lite
+After=network.target
+
+[Service]
+Type=simple 
+WorkingDirectory=/opt/etherpad-lite
+User=node
+Group=node  
+Environment=NODE_ENV=production
+ExecStart=/opt/etherpad-lite/bin/run.sh
+ExecStop=/bin/kill -TERM $MAINPID  
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=15
+ExecStartPre=/bin/mkdir -p /run/etherpad
+ExecStartPre=/bin/chown node:node /run/etherpad
+ExecStartPre=/bin/chmod 755 /run/etherpad
+PermissionsStartOnly=true
+TimeoutStopSec=600
+PIDFile=/run/etherpad.pid
+
+[Install]
+WantedBy=multi-user.target

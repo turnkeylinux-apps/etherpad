@@ -1,0 +1,81 @@
+#!/usr/bin/python
+from getpass import getpass
+import sys
+import json
+from os import system
+import socket
+from time import sleep
+
+usage='''etherpad-admin [enable | disable]
+
+a tool for enabling, disabling and setting password
+of etherpad admin account
+
+enable - creates "admin" user if it doesn't exist,
+	set's it as an admin and sets password
+disable - remove's "admin" user as an admin if it
+    exists
+'''
+
+if len(sys.argv) != 2:
+    print(usage)
+    sys.exit(1)
+if not sys.argv[1] in ('enable', 'disable', 'setpass'):
+    print(usage)
+    sys.exit(1)
+
+print(("Warning: etherpad-lite stores admin passwords in plaintext in "
+       "/opt/etherpad-lite/settings.json and etherpad-lite admin logins "
+       "persist across etherpad restarts. It's highly recommended you "
+       "do not login on a public or shared computer."))
+
+def is_port_open(port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = sock.connect_ex(('localhost', 8000))
+    sock.close()
+    return result == 0
+
+
+conf = '/opt/etherpad-lite/settings.json'
+
+with open(conf, 'r') as fob:
+    settings = json.load(fob)
+
+if sys.argv[1] == 'enable':
+    print
+    while True:
+        password = getpass('New etherpad admin password: ')
+        confirm_password = getpass('Confirm new etherpad admin password: ')
+        if password == confirm_password:
+            break
+        else:
+            sys.stderr.write("Passwords do not match!\n\n")
+
+    settings['users']['admin']['password'] = password
+    settings['users']['admin']['is_admin'] = True
+
+elif sys.argv[1] == 'disable':
+    settings['users']['admin']['is_admin'] = False
+
+with open(conf, 'w') as fob:
+    json.dump(settings, fob, indent=4)
+
+system('service etherpad restart')
+sys.stdout.write('Waiting for etherpad to come up (may take a while) ')
+sys.stdout.flush()
+
+up = False
+
+for i in range(50):
+    if is_port_open(8000):
+        up = True
+        break 
+    sys.stdout.write('. ')
+    sys.stdout.flush()
+    sleep(1)
+
+if not up:
+    print
+    sys.stderr.write("Error: Etherpad failed to come back up after restart!\n") 
+else:
+    print('Done!')
