@@ -45,7 +45,7 @@ cat >$NODEAPP/settings.json.example<<EOF
   "users": {
     "admin": {
       "password": "turnkey",
-      "is_admin": true
+      "is_admin": false
     }
   },
 
