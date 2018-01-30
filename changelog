@@ -1,3 +1,14 @@
+turnkey-etherpad-15.0 (1) turnkey; urgency=low
+
+  * Install Adminer directly from stretch/main repo
+
+  * Replace MySQL with MariaDB
+
+  * Note: Please refer to turnkey-core's changelog for changes common to all
+    appliances. Here we only describe changes specdific to this appliance.
+
+ -- Vlad Kuzmenko <vlad.work.here@gmail.com>  Sat, 20 Jan 2017 07:45:42 +0200
+
 turnkey-etherpad-14.2 (1) turnkey; urgency=low
 
   * Updated Etherpad to latest upstream version.
