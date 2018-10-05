@@ -1,0 +1,237 @@
+/*
+ * TurnKey Etherpad settings.json file.
+ *
+ * Please see Etherpad settings.json.template for original layout with more
+ * detailed comments and all avaialble options valid for this version.
+ *
+ * This file must be valid JSON. But comments are allowed.
+ *
+ * Please edit settings.json to change current settings.
+ *
+ */
+{
+
+  /* Main settings. */
+
+  "title": "Etherpad - Powered by TurnKey Linux",
+  "favicon": "favicon.ico",
+  "ip": "127.0.0.1",
+  "port" : 8000,
+  "showSettingsInAdminPage" : true,
+
+  "dbType" : "mysql",
+  "dbSettings" : {
+                   "user"    : "etherpad",
+                   "host"    : "localhost",
+                   "password": "UNSET",
+                   "database": "etherpad",
+                   "charset" : "utf8mb4"
+                 },
+
+  "defaultPadText" : "Welcome to TurnKey Etherpad!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
+
+  /* Default Pad behavior. */
+
+  "padOptions": {
+    "noColors": false,
+    "showControls": true,
+    "showChat": true,
+    "showLineNumbers": true,
+    "useMonospaceFont": false,
+    "userName": false,
+    "userColor": false,
+    "rtl": false,
+    "alwaysShowChat": false,
+    "chatAndUsers": false,
+    "lang": "en-gb"
+  },
+  "suppressErrorsInPadText" : false,
+
+  /* Pad Shortcut Keys */
+
+  "padShortcutEnabled" : {
+    "altF9"     : true, /* focus on the File Menu and/or editbar */
+    "altC"      : true, /* focus on the Chat window */
+    "cmdShift2" : true, /* shows a gritter popup showing a line author */
+    "delete"    : true,
+    "return"    : true,
+    "esc"       : true, /* in mozilla versions 14-19 avoid reconnecting pad */
+    "cmdS"      : true, /* save a revision */
+    "tab"       : true, /* indent */
+    "cmdZ"      : true, /* undo/redo */
+    "cmdY"      : true, /* redo */
+    "cmdI"      : true, /* italic */
+    "cmdB"      : true, /* bold */
+    "cmdU"      : true, /* underline */
+    "cmd5"      : true, /* strike through */
+    "cmdShiftL" : true, /* unordered list */
+    "cmdShiftN" : true, /* ordered list */
+    "cmdShift1" : true, /* ordered list */
+    "cmdShiftC" : true, /* clear authorship */
+    "cmdH"      : true, /* backspace */
+    "ctrlHome"  : true, /* scroll to top of pad */
+    "pageUp"    : true,
+    "pageDown"  : true
+  },
+
+  /* User settings */
+
+  "requireSession" : false,
+  "editOnly" : false,
+  "sessionNoPassword" : false,
+  "requireAuthentication" : false, // "/admin" always requires authentication.
+  "requireAuthorization" : true, // for modules and is_admin users.
+
+  /*
+   * Users authentication.
+   *
+   * is_admin = true gives access to /admin.
+   *
+   * Note: default Etherpad behaviour is to store passwords in plaintext in
+   *       this file. To mitigate this issue, plugin ep_hash_auth is
+   *       pre-installed.
+   *
+   *       To generate a user password hash for "PASSWORD":
+   *
+   *       python -c 'import bcrypt; 
+   *           print(bcrypt.hashpw(b"PASSWORD", bcrypt.gensalt(rounds=10, prefix=b"2a")))'
+   *
+   */
+
+  "users": {
+    "admin": {
+      "hash": "UNSET",
+      "is_admin": true
+    },
+    /*
+    "user": {
+      "hash": "user_password_hash",
+      "is_admin": false
+    } */
+  },
+
+  /* Export settings */
+
+  "tidyHtml" : "/usr/bin/tidy",
+  "allowUnknownFileEnds" : true,
+
+  /* Abiword - for advanced import/export features of pads.
+   *
+   * null = disabled - supports only plain text and HTML import/exports.
+   *
+   * Abiword is not installed by default on TurnKey installations. It requires
+   * 182 MB of additional disk space. LibreOffice (noted below) is another
+   * alternative.
+   *
+   * To enable this, please install Abiword:
+   *
+   *     apt-get update && apt-get install abiword
+   *
+   * Then set the Abiword path below to "/usr/bin/abiword" (include quotes)
+   *
+   */
+  "abiword" : null, 
+
+  /* LibreOffice - alternative to Abiword.
+   *
+   * LibreOffice is also not installed by default on TurnKey installations. It
+   * may be a superior option as it only requires 96.6 MB of additional disk space.
+   *
+   *     apt-get update && apt-get install libreoffice-common
+   *
+   * Then set the soffice path below to "/usr/bin/soffice" (include quotes)
+   *
+   */
+  "soffice" : null,
+
+  /* Server settings */
+
+  "minify" : true, // JavaScript/CSS minify
+  "maxAge" : 21600, // JS/CSS caching - 60 * 60 * 6 = 6 hours
+  "trustProxy" : true,
+  "disableIPlogging" : false,
+  "automaticReconnectionTimeout" : 0,
+  "socketTransportProtocols" : ["xhr-polling", "jsonp-polling", "htmlfile"],
+  "loadTest": false, // WARNING: enabling will disable security on the instance.
+
+  /* Pad settings */
+
+  "scrollWhenFocusLineIsOutOfViewport": {
+    "percentage": {
+      "editionAboveViewport": 0,
+      "editionBelowViewport": 0
+    },
+    "duration": 0, // disables scroll animation
+    "scrollWhenCaretIsInTheLastLineOfViewport": false,
+    "percentageToScrollWhenUserPressesArrowUp": 0
+  },
+  "indentationOnNewLine": false, // Disable indentation on new line when previous line ends with special char
+
+  /* Toolbar buttons configuration - uncomment to customize. */
+
+  /*
+  "toolbar": {
+    "left": [
+      ["bold", "italic", "underline", "strikethrough"],
+      ["orderedlist", "unorderedlist", "indent", "outdent"],
+      ["undo", "redo"],
+      ["clearauthorship"]
+    ],
+    "right": [
+      ["importexport", "timeslider", "savedrevision"],
+      ["settings", "embed"],
+      ["showusers"]
+    ],
+    "timeslider": [
+      ["timeslider_export", "timeslider_returnToPad"]
+    ]
+  },
+  */
+
+  /* Logging */
+
+  "loglevel": "WARN",
+  "logconfig" :
+    { "appenders": [
+        { "type": "console"
+        //, "category": "access"// only logs pad access
+        }
+
+      , { "type": "file"
+      , "filename": "/var/log/etherpad/etherpad.log"
+      , "maxLogSize": 1024
+      , "backups": 3 // how many log files there're gonna be at max
+      //, "category": "test" // only log a specific category
+        }
+
+      /*
+      , { "type": "logLevelFilter"
+        , "level": "warn" // filters out all log messages that have a lower level than "error"
+        , "appender":
+          {  Use whatever appender you want here  }
+        }
+      */
+
+      /*
+      , { "type": "logLevelFilter"
+        , "level": "error" // filters out all log messages that have a lower level than "error"
+        , "appender":
+          { "type": "smtp"
+          , "subject": "An error occurred in your EPL instance!"
+          , "recipients": "bar@blurdybloop.com, baz@blurdybloop.com"
+          , "sendInterval": 300 // 60 * 5 = 5 minutes -- will buffer log messages; set to 0 to send a mail for every message
+          , "transport": "SMTP", "SMTP": { // see https://github.com/andris9/Nodemailer#possible-transport-methods
+              "host": "smtp.example.com", "port": 465,
+              "secureConnection": true,
+              "auth": {
+                  "user": "foo@example.com",
+                  "pass": "bar_foo"
+              }
+            }
+          }
+        }
+      */
+
+      ]
+    } // logconfig
+}
