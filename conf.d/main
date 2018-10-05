@@ -19,11 +19,9 @@ $MYSQL_BATCH --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE ut
 # download etherpad and install dependencies
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
-cd $(dirname $NODEAPP)
-git clone --depth=1 https://github.com/ether/etherpad-lite.git
-
-
+git clone --depth=1 --branch=master https://github.com/ether/etherpad-lite.git $NODEAPP
 chown -R node:node $NODEAPP
+
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 
 unset HTTP_PROXY
