@@ -20,9 +20,12 @@ $MYSQL_BATCH --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE ut
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
 git clone --depth=1 --branch=master https://github.com/ether/etherpad-lite.git $NODEAPP
-chown -R node:node $NODEAPP
 
+chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
+su - node -c "cd $NODEAPP/src && npm install bcrypt"
+su - node -c "cd $NODEAPP/src && npm install bcrypt --save"
+su - node -c "cd $NODEAPP && npm install ep_hash_auth"
 
 unset HTTP_PROXY
 
