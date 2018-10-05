@@ -28,41 +28,6 @@ su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 
 unset HTTP_PROXY
 
-# setup etherpad
-cat >$NODEAPP/settings.json.example<<EOF
-{
-  "ip": "127.0.0.1",
-  "port": 8000,
-
-  "dbType": "mysql",
-  "dbSettings": {
-    "user"    : "$DB_USER",
-    "host"    : "localhost",
-    "password": "$DB_PASS",
-    "database": "$DB_NAME"
-  },
-
-  "users": {
-    "admin": {
-      "password": "",
-      "is_admin": false
-    }
-  },
-
-  "defaultPadText": "Welcome to TurnKey Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
-  "showSettingsInAdminPage" : false,
-  "requireSession": false,
-  "editOnly": false,
-  "minify": true,
-  "maxAge": 21600000, // 6 hours
-  "abiword": null,
-  "loglevel": "WARN"
-}
-EOF
-# get settings without comments, makes editing in etherpad-admin
-# cleaner, preserved commented version as example
-sed 's|//.*||' $NODEAPP/settings.json.example > $NODEAPP/settings.json
-
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
 chown node:node $NODEAPP/SESSIONKEY.txt
