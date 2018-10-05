@@ -31,6 +31,10 @@ unset HTTP_PROXY
 
 # default TurnKey Etherpad settings.json (config file) in overlay
 mv /usr/local/src/tkl-etherpad.settings.example $NODEAPP/settings.json
+sed -i "\|\"password\":|s|:.*|: \"$DB_PASS\",|" $NODEAPP/settings.json
+
+mkdir -p /var/log/etherpad
+chown -R node:node /var/log/etherpad
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
