@@ -29,26 +29,24 @@ su - node -c "cd $NODEAPP && npm install ep_hash_auth"
 
 unset HTTP_PROXY
 
+# default TurnKey Etherpad settings.json (config file) in overlay
+mv /usr/local/src/tkl-etherpad.settings.example $NODEAPP/settings.json
+
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
-chown node:node $NODEAPP/SESSIONKEY.txt
-
 echo -n "done" > $NODEAPP/src/.ep_initialized
-chown node:node $NODEAPP/src/.ep_initialized
+mkdir -p $NODEAPP/var
+
+chown -R node:node $NODEAPP
 
 service etherpad start
 
-while :; do service etherpad status && break; sleep 1; done
+while :; do [ $(pgrep node) != "" ] && break; sleep 1; done
 
 service etherpad stop
-
-mkdir -p $NODEAPP/var
-chown -R node:node $NODEAPP/var
-chown -R node:node $NODEAPP/node_modules
 
 service mysql stop
 
 systemctl enable etherpad
 
 ln -s /etc/nginx/sites-available/nodejs /etc/nginx/sites-enabled/nodejs
-rm $NODEAPP/src/package-lock.json
