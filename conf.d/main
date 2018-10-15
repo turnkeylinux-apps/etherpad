@@ -19,70 +19,38 @@ $MYSQL_BATCH --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE ut
 # download etherpad and install dependencies
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
-cd $(dirname $NODEAPP)
-git clone --depth=1 https://github.com/ether/etherpad-lite.git
-
+git clone --depth=1 --branch=master https://github.com/ether/etherpad-lite.git $NODEAPP
 
 chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
+su - node -c "cd $NODEAPP/src && npm install bcrypt"
+su - node -c "cd $NODEAPP/src && npm install bcrypt --save"
+su - node -c "cd $NODEAPP && npm install ep_hash_auth"
 
 unset HTTP_PROXY
 
-# setup etherpad
-cat >$NODEAPP/settings.json.example<<EOF
-{
-  "ip": "127.0.0.1",
-  "port": 8000,
+# default TurnKey Etherpad settings.json (config file) in overlay
+mv /usr/local/src/tkl-etherpad.settings.example $NODEAPP/settings.json
+sed -i "\|\"password\":|s|:.*|: \"$DB_PASS\",|" $NODEAPP/settings.json
 
-  "dbType": "mysql",
-  "dbSettings": {
-    "user"    : "$DB_USER",
-    "host"    : "localhost",
-    "password": "$DB_PASS",
-    "database": "$DB_NAME"
-  },
-
-  "users": {
-    "admin": {
-      "password": "",
-      "is_admin": false
-    }
-  },
-
-  "defaultPadText": "Welcome to TurnKey Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: http:\/\/www.turnkeylinux.org\/etherpad\n",
-  "showSettingsInAdminPage" : false,
-  "requireSession": false,
-  "editOnly": false,
-  "minify": true,
-  "maxAge": 21600000, // 6 hours
-  "abiword": null,
-  "loglevel": "WARN"
-}
-EOF
-# get settings without comments, makes editing in etherpad-admin
-# cleaner, preserved commented version as example
-sed 's|//.*||' $NODEAPP/settings.json.example > $NODEAPP/settings.json
+mkdir -p /var/log/etherpad
+chown -R node:node /var/log/etherpad
 
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
-chown node:node $NODEAPP/SESSIONKEY.txt
-
 echo -n "done" > $NODEAPP/src/.ep_initialized
-chown node:node $NODEAPP/src/.ep_initialized
+mkdir -p $NODEAPP/var
+
+chown -R node:node $NODEAPP
 
 service etherpad start
 
-while :; do service etherpad status && break; sleep 1; done
+while :; do [ $(pgrep node) != "" ] && break; sleep 1; done
 
 service etherpad stop
-
-mkdir -p $NODEAPP/var
-chown -R node:node $NODEAPP/var
-chown -R node:node $NODEAPP/node_modules
 
 service mysql stop
 
 systemctl enable etherpad
 
 ln -s /etc/nginx/sites-available/nodejs /etc/nginx/sites-enabled/nodejs
-rm $NODEAPP/src/package-lock.json

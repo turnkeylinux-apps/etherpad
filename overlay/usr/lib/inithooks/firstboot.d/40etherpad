@@ -1,0 +1,8 @@
+#!/bin/bash -e
+# set etherpad admin password
+
+. /etc/default/inithooks
+
+[ -e $INITHOOKS_CONF ] && . $INITHOOKS_CONF
+$INITHOOKS_PATH/bin/etherpad.py --pass="$APP_PASS"
+
