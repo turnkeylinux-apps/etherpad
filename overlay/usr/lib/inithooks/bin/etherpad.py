@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """Set Etherpad admin password
 
 Option:
@@ -6,7 +6,7 @@ Option:
 
 """
 
-from os import system
+import subprocess
 import sys
 import getopt
 import string
@@ -25,7 +25,7 @@ def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], "h",
                                        ['help', 'pass='])
-    except getopt.GetoptError, e:
+    except getopt.GetoptError as e:
         usage(e)
 
     password = ""
@@ -41,11 +41,13 @@ def main():
             "Etherpad Password",
             "Enter new password for the Etherpad 'admin' account.")
 
-    hash_pass = bcrypt.hashpw(b{},
-            bcrypt.gensalt(rounds=10, prefix=b"2a").format(password))
+    hash_pass = bcrypt.hashpw(password.encode('utf-8'),
+                              bcrypt.gensalt(rounds=10, prefix=b"2a")
+                             ).decode('utf-8')
 
-    system("sed -i '/\"admin\":/,+1 s|\\(\"hash\":\\).*|\\1 \"%s\",|'
-            /opt/etherpad-lite/settings.json" % hash_pass)
+    subprocess.run(["sed", "-i",
+                    f'/\"admin\":/,+1 s|\\(\"hash\":\\).*|\\1 \"{hash_pass}\",|',
+                    "/opt/etherpad-lite/settings.json"])
 
 if __name__ == "__main__":
     main()
