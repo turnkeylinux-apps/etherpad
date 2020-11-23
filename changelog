@@ -1,7 +1,9 @@
-turnkey-etherpad-15.0 (1) turnkey; urgency=low
+turnkey-etherpad-16.0 (1) turnkey; urgency=low
 
-  * Install latest stable etherpad-lite from upstream source code via Git clone
-    from master branch - currently provides v1.7.
+  * First Etherpad release since v14.2!
+
+  * Install latest stable etherpad-lite from upstream source code via git
+   clone from master branch - currently provides v1.8.6.
 
   * Re-enable admin interface by default (disabled in v14.2 due to security
     concerns).
@@ -9,20 +11,34 @@ turnkey-etherpad-15.0 (1) turnkey; urgency=low
   * Pre-install ep_hash_auth plugin (hashes user passwords) including
     dependencies - closes #874.
 
+  * Pre-install other plugins to improve user experience:
+
+    - ep_headings2
+    - ep_markdown
+    - ep_comments_page
+    - ep_align
+    - ep_page_view
+    - ep_font_color
+    - ep_webrtc
+    - ep_embedded_hyperlinks2
+
   * Updated TurnKey config file (settings.json) to be a closer match to
     default upstream (although removed lots of comments, consolidated
     somewhat and reordered).
 
   * Add (modified) inithooks back in to set (hashed) admin password.
 
-  * Provides NodeJS v8.12.0.
+  * Includes NodeJS v14.15.1 (installed via TurnKey common NodeJS install
+    script).
+
+  * Provide updated Etherpad specific Nginx config (taken from Etherpad docs).
 
   * Replace MySQL with MariaDB.
 
   * Note: Please refer to turnkey-core's changelog for changes common to all
     appliances. Here we only describe changes specific to this appliance.
 
- -- Jeremy Davis <jeremy@turnkeylinux.org>  Fri, 05 Oct 2018 17:33:21 +1000
+ -- Jeremy Davis <jeremy@turnkeylinux.org>  Mon, 23 Nov 2020 13:16:00 +1100
 
 turnkey-etherpad-14.2 (1) turnkey; urgency=low
 

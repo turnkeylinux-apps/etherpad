@@ -18,7 +18,7 @@ and on top of that:
 
 - Node.js configurations:
    
-   - Includes NodeJS 8 and various other Node tools (n, npm, etc).
+   - Includes NodeJS 14 and various other Node tools (n, npm, etc).
    - The nginx web server is pre-configured to proxy to nodejs daemon,
      with SSL support out of the box.
    - Includes custom nodejs initscript for running node app as daemon.
@@ -26,6 +26,30 @@ and on top of that:
 - SSL support out of the box
 - Includes postfix MTA (bound to localhost) for sending of email.  Also
   includes webmin postfix module for convenience.
+
+
+Note: This appliance does not include Abiword or Libre Office. One of these
+tools is required to export pads, but they add significant size to the
+image. They are easy to install, please see below.
+
+Install Abiword aand enable it in Etherpad::
+
+   apt update
+   apt install abiword
+   sed -i "s|\"abiword\" :.*|\"abiword\" : \"/usr/bin/abiword\",|" \
+      /opt/etherpad-lite/settings.json
+   systemctl restart etherpad
+
+Or;
+
+Install Libre Office and enable it in Etherpad::
+
+   apt update
+   apt install soffice-common
+   sed -i "s|\"soffice\" :.*|\"soffice\" : \"/usr/bin/soffice\",|" \
+      /opt/etherpad-lite/settings.json
+   systemctl restart etherpad
+
 
 
 Credentials *(passwords set at first boot)*
