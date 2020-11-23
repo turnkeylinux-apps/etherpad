@@ -1,9 +1,7 @@
 #include <turnkey/base>
 #include <turnkey/nodejs>
-
-mysql-server
-webmin-mysql
+#include <turnkey/mysql>
 
 bcrypt          /* required for ep_hash_auth plugin */
-python-bcrypt   /* required for ep_hash_auth plugin */
-tidy            /* improves output of exported pads  and only adds 893 kB */
+python3-bcrypt  /* required for ep_hash_auth plugin */
+tidy            /* improves output of exported pads and only adds 893 kB */
