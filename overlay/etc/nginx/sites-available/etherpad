@@ -1,0 +1,46 @@
+upstream etherpad {
+    server localhost:9001;
+}
+
+server {
+    listen       443 ssl http2;
+    listen       [::]:443 ssl http2;
+    server_name  *; # set domain name here if using one
+
+    access_log  /var/log/nginx/etherpad.access.log;
+    error_log   /var/log/nginx/etherpad.error.log;
+
+    ssl                  on;
+    include /etc/nginx/include/ssl;
+
+    location / {
+        proxy_pass         http://etherpad;
+        proxy_buffering    off; # be careful, this line doesn't override any proxy_buffering on set in a conf.d/file.conf
+        proxy_set_header   Host $host;
+        proxy_pass_header  Server;
+
+        # Note you might want to pass these headers etc too.
+        proxy_set_header    X-Real-IP $remote_addr; # https://nginx.org/en/docs/http/ngx_http_proxy_module.html
+        proxy_set_header    X-Forwarded-For $remote_addr; # EP logs to show the actual remote IP
+        proxy_set_header    X-Forwarded-Proto $scheme; # for EP to set secure cookie flag when https is used
+        proxy_http_version  1.1; # recommended with keepalive connections
+
+        # WebSocket proxying - from https://nginx.org/en/docs/http/websocket.html
+        proxy_set_header  Upgrade $http_upgrade;
+        proxy_set_header  Connection $connection_upgrade;
+    }
+}
+
+# we're in the http context here
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# enforce HTTPS
+server {
+    listen       80;
+    listen       [::]:80;
+    server_name  pad.example.com;
+    return 302   https://$host$request_uri; # change this to 301 if using a domain
+}
