@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/bash -ex
 
 DB_NAME=etherpad
 DB_USER=etherpad
@@ -47,17 +47,14 @@ mkdir -p $NODEAPP/var
 chown -R node:node $NODEAPP
 
 # manually start etherpad the first time
-su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh > log.tmp &"
+su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 2>&1 &"
 
-while true; do
-    echo "Waiting for Etherpad to finish first start."
-    sleep 1
-    if grep "You can access your Etherpad instance" log.tmp >/dev/null ; then
-       echo "Etherpad first run complete. Now killing."
-       kill -SIGTERM $(pgrep node)
-       break
-    fi
+echo "Waiting for Etherpad to complete first run."
+while ! grep "You can access your Etherpad instance" $NODEAPP/log.tmp; do
+    sleep 10
 done
+echo "Etherpad first run complete. Now killing."
+kill -s SIGTERM $(pgrep node)
 rm $NODEAPP/log.tmp
 
 service mysql stop
