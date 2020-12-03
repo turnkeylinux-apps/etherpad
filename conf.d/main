@@ -21,13 +21,13 @@ mysql --batch --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE u
 git clone --depth=1 --branch=master https://github.com/ether/etherpad-lite.git $NODEAPP
 
 PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
-         ep_page_view ep_font_color ep_webrtc ep_embedded_hyperlinks2"
+         ep_font_color ep_webrtc ep_embedded_hyperlinks2"
 
 chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
+su - node -c "cd $NODEAPP && npm install $PLUGINS"
 su - node -c "cd $NODEAPP/src && npm install bcrypt"
 su - node -c "cd $NODEAPP/src && npm install bcrypt --save"
-su - node -c "cd $NODEAPP && npm install $PLUGINS"
 
 unset HTTP_PROXY
 
