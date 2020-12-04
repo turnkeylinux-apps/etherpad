@@ -26,7 +26,7 @@ PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
 chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 su - node -c "cd $NODEAPP && npm install $PLUGINS"
-su - node -c "cd $NODEAPP/src && npm install bcrypt"
+su - node -c "cd $NODEAPP && npm install bcrypt"
 su - node -c "cd $NODEAPP/src && npm install bcrypt --save"
 
 unset HTTP_PROXY
