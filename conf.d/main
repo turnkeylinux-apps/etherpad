@@ -17,8 +17,9 @@ mysql --batch --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE u
 # download etherpad and install dependencies
 [ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
 
-# Etherpad "master" branch is stable; default repo is "development".
-git clone --depth=1 --branch=master https://github.com/ether/etherpad-lite.git $NODEAPP
+# Etherpad "master" branch should be safe, but let's use the release
+ep_version=$(gh_releases ether/etherpad-lite | grep -v beta\|rc | tail -1)
+git clone --depth=1 --branch=$ep_version https://github.com/ether/etherpad-lite.git $NODEAPP
 
 PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
          ep_font_color ep_webrtc ep_embedded_hyperlinks2"
