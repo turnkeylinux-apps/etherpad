@@ -10,6 +10,7 @@
  *
  * Please note that starting from Etherpad 1.6.0 you can store DB credentials in
  * a separate file (credentials.json).
+ *
  */
 {
   /* Main settings. */
@@ -37,7 +38,6 @@
   },
 
   "defaultPadText" : "Welcome to TurnKey Etherpad!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nRelease notes: https:\/\/www.turnkeylinux.org\/etherpad\n",
-
 
   /* Default Pad behavior. */
 
@@ -86,7 +86,6 @@
 
   "requireSession": false,
   "editOnly": false,
-  "sessionNoPassword": false,
   "minify": true,
   "maxAge": 21600, // 60 * 60 * 6 = 6 hours
 
@@ -104,14 +103,31 @@
   "allowUnknownFileEnds": true,
 
   "requireAuthentication": false, /* Note: "/admin" always requires authentication. */
-
   "requireAuthorization": false,
 
   "trustProxy": true,
 
+  /*
+   * Settings controlling the session cookie issued by Etherpad.
+   */
+  "cookie": {
+    /*
+     * Value of the SameSite cookie property. "Lax" is recommended unless
+     * Etherpad will be embedded in an iframe from another site, in which case
+     * this must be set to "None". Note: "None" will not work (the browser will
+     * not send the cookie to Etherpad) unless https is used to access Etherpad
+     * (either directly or via a reverse proxy with "trustProxy" set to true).
+     *
+     * "Strict" is not recommended because it has few security benefits but
+     * significant usability drawbacks vs. "Lax". See
+     * https://stackoverflow.com/q/41841880 for discussion.
+     */
+    "sameSite": "Lax"
+  },
+
   "disableIPlogging": false,
 
-  "automaticReconnectionTimeout": 0,
+  "automaticReconnectionTimeout": 0, // 0 = disabled
 
   "scrollWhenFocusLineIsOutOfViewport": {
     "percentage": {
@@ -120,16 +136,15 @@
     },
 
     "duration": 0,
-
     "scrollWhenCaretIsInTheLastLineOfViewport": false,
-
     "percentageToScrollWhenUserPressesArrowUp": 0
   },
 
   "users": {
     "admin": {
       "hash": "UNSET_PASS",
-      "is_admin": true
+      "is_admin": true,
+      "displayname": "Default Admin"
     },
     "user": {
       "hash": "UNSET_PASS",
@@ -138,8 +153,28 @@
   },
 
   "socketTransportProtocols" : ["xhr-polling", "jsonp-polling", "htmlfile"],
+
+  "socketIo": {
+    /*
+     * Maximum permitted client message size (in bytes). All messages from
+     * clients that are larger than this will be rejected. Large values make it
+     * possible to paste large amounts of text, and plugins may require a larger
+     * value to work properly, but increasing the value increases susceptibility
+     * to denial of service attacks (malicious clients can exhaust memory).
+     */
+    "maxHttpBufferSize": 10000
+  },
+
   "loadTest": false,
+
+  /*
+   * Disable indentation on new line when previous line ends with some special
+   * chars (':', '[', '(', '{')
+   */
+
+  /*
   "indentationOnNewLine": false,
+  */
 
   "importExportRateLimiting": {
     // duration of the rate limit window (milliseconds)
@@ -151,13 +186,11 @@
 
   "importMaxFileSize": 52428800, // in bytes; default = 50MB: 50 * 1024 * 1024
 
-  "allowAnyoneToImport": false, 
-
   "commitRateLimiting": {
     // duration of the rate limit window (seconds)
     "duration": 1,
 
-    // maximum number of chanes per IP to allow during the rate limit window
+    // maximum number of changes per IP to allow during the rate limit window
     "points": 10
   },
 
@@ -197,7 +230,7 @@
         }
 
       , { "type": "logLevelFilter"
-        , "level": "warn"
+        , "level": "info" // filters out all log messages that have a lower level than "warn"
         , "appender":
           {  "type": "file",
              "filename": "/var/log/etherpad/etherpad.log",
@@ -205,9 +238,12 @@
              "backups": 3 // how many log files there're gonna be at max
           },
         }
-
       ]
     }, // logconfig
 
-  "customLocaleStrings": {}
+  /* Override any strings found in locale directories */
+  "customLocaleStrings": {},
+
+  /* Disable Admin UI tests */
+  "enableAdminUITests": false
 }
