@@ -29,6 +29,7 @@ su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 su - node -c "cd $NODEAPP && npm install $PLUGINS"
 su - node -c "cd $NODEAPP && npm install bcrypt"
 su - node -c "cd $NODEAPP/src && npm install bcrypt --save"
+su - node -c "cd $NODEAPP && ./src/bin/installDeps.sh"
 
 unset HTTP_PROXY
 
