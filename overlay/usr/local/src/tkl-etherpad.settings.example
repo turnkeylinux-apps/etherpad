@@ -143,7 +143,8 @@
   "users": {
     "admin": {
       "hash": "UNSET_PASS",
-      "is_admin": true
+      "is_admin": true,
+      "displayname": "Default Admin"
     },
     "user": {
       "hash": "UNSET_PASS",
