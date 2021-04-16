@@ -48,6 +48,7 @@ def main():
     subprocess.run(["sed", "-i",
                     f'/\"admin\":/,+1 s|\\(\"hash\":\\).*|\\1 \"{hash_pass}\",|',
                     "/opt/etherpad-lite/settings.json"])
+    subprocess.run(["systemctl", "restart", "etherpad.service"])
 
 if __name__ == "__main__":
     main()
