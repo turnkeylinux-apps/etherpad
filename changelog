@@ -1,3 +1,11 @@
+turnkey-openldap-17.0 (1) turnkey; urgency=low
+
+  * Updating openldap and dependencies to tkldev v27.0
+
+  * Note: Please refer to turnkey-core's 16.1 changelog for changes common to
+    all appliances. Here we only describe changes specific to this appliance.
+
+ -- Mattie Darden <mattie@turnkeylinux.org>  Tue, 23 Aug 2022 19:13:38 -0400
 turnkey-etherpad-16.1 (1) turnkey; urgency=low
 
   * Install latest stable etherpad-lite from upstream source code via git
