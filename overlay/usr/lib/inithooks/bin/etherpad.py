@@ -12,7 +12,10 @@ import getopt
 import string
 import bcrypt
 
+
+
 from  libinithooks.dialog_wrapper import Dialog
+
 
 def usage(s=None):
     if s:
