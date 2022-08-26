@@ -2,4 +2,6 @@
 #include <turnkey/nodejs>
 #include <turnkey/mysql>
 
+bcrypt          /* required for ep_hash_auth plugin */
+python3-bcrypt  /* required for ep_hash_auth plugin */
 tidy            /* improves output of exported pads and only adds 893 kB */

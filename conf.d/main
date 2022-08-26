@@ -27,8 +27,8 @@ PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
 chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 su - node -c "cd $NODEAPP && npm install $PLUGINS"
-su - node -c "cd $NODEAPP && npm install bcrypt"
-su - node -c "cd $NODEAPP/src && npm install bcrypt --save"
+su - node -c "cd $NODEAPP && npm install argon2"
+su - node -c "cd $NODEAPP/src && npm install argon2 --save"
 su - node -c "cd $NODEAPP && ./src/bin/installDeps.sh"
 
 unset HTTP_PROXY
@@ -52,9 +52,7 @@ chown -R node:node $NODEAPP
 su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 2>&1 &"
 
 echo "Waiting for Etherpad to complete first run."
-while ! grep "You can access your Etherpad instance" $NODEAPP/log.tmp; do
-    sleep 10
-done
+
 echo "Etherpad first run complete. Now killing."
 kill -s SIGTERM $(pgrep node)
 rm $NODEAPP/log.tmp
