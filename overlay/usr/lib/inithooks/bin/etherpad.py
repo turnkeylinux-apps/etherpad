@@ -10,10 +10,10 @@ import subprocess
 import sys
 import getopt
 import string
-import bcrypt
 
 
 
+from argon2 import PasswordHasher
 from  libinithooks.dialog_wrapper import Dialog
 
 
@@ -44,7 +44,7 @@ def main():
             "Etherpad Password",
             "Enter new password for the Etherpad 'admin' account.")
 
-    ph = Password Hasher()
+    ph = PasswordHasher()
     hash_pass = ph.hash(password)
 
     subprocess.run(["sed", "-i",
