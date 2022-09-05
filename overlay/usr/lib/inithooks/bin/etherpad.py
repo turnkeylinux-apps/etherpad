@@ -10,9 +10,12 @@ import subprocess
 import sys
 import getopt
 import string
-import bcrypt
 
-from dialog_wrapper import Dialog
+
+
+from argon2 import PasswordHasher
+from  libinithooks.dialog_wrapper import Dialog
+
 
 def usage(s=None):
     if s:
@@ -41,9 +44,8 @@ def main():
             "Etherpad Password",
             "Enter new password for the Etherpad 'admin' account.")
 
-    hash_pass = bcrypt.hashpw(password.encode('utf-8'),
-                              bcrypt.gensalt(rounds=10, prefix=b"2a")
-                             ).decode('utf-8')
+    ph = PasswordHasher()
+    hash_pass = ph.hash(password)
 
     subprocess.run(["sed", "-i",
                     f'/\"admin\":/,+1 s|\\(\"hash\":\\).*|\\1 \"{hash_pass}\",|',
