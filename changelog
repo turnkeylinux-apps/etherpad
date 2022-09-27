@@ -1,4 +1,4 @@
-turnkey-etherpad-turnkey-openldap-17.1 (1) turnkey; urgency=low
+turnkey-etherpad-17.0 (1) turnkey; urgency=low
 
   * Updating etherpad and dependencies to tkldev v17
  
