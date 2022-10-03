@@ -69,3 +69,7 @@ systemctl enable etherpad
 # shared NodeJS conf
 rm /etc/nginx/sites-available/nodejs
 ln -s /etc/nginx/sites-available/etherpad /etc/nginx/sites-enabled/etherpad
+
+service nginx restart
+service nginx reload
+nginx -t
