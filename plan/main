@@ -2,6 +2,5 @@
 #include <turnkey/nodejs>
 #include <turnkey/mysql>
 
-nodejs
 tidy            /* improves output of exported pads and only adds 893 kB */
 python3-argon2 /* replaces bcrypt for hashing mechanism*/
