@@ -10,8 +10,7 @@ server {
     access_log  /var/log/nginx/etherpad.access.log;
     error_log   /var/log/nginx/etherpad.error.log;
 
-    ssl                  on;
-    include /etc/nginx/include/ssl;
+    include /etc/nginx/snippets/ssl.conf;
 
     location / {
         proxy_pass         http://etherpad;
@@ -41,6 +40,5 @@ map $http_upgrade $connection_upgrade {
 server {
     listen       80;
     listen       [::]:80;
-    server_name  _; # set domain name here too if using one
     return 302   https://$host$request_uri; # change this to 301 if using a domain
 }
