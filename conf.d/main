@@ -25,6 +25,7 @@ PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
          ep_font_color ep_webrtc ep_embedded_hyperlinks2"
 
 chown -R node:node $NODEAPP
+n 14
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 su - node -c "cd $NODEAPP && npm install $PLUGINS"
 su - node -c "cd $NODEAPP && npm install argon2"
@@ -53,8 +54,8 @@ su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 
 
 echo "Waiting for Etherpad to complete first run."
 
-while ! grep "Starting Etherpad..." $NODEAPP/log.tmp; do
-	sleep 1
+while [[ "$(curl -Lk http://localhost)" = *"Unavailable"* ]]; do
+       sleep 10
 done
 
 echo "Etherpad first run complete. Now killing."
@@ -69,3 +70,5 @@ systemctl enable etherpad
 # shared NodeJS conf
 rm /etc/nginx/sites-available/nodejs
 ln -s /etc/nginx/sites-available/etherpad /etc/nginx/sites-enabled/etherpad
+nginx -t
+rm /etc/nginx/sites-enabled/tkl-default
