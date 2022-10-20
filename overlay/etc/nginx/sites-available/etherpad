@@ -10,6 +10,8 @@ server {
     access_log  /var/log/nginx/access.log;
     error_log   /var/log/nginx/error.log;
 
+    include snippets/ssl.conf;
+
     location / {
         proxy_pass         http://etherpad;
         proxy_buffering    off; # be careful, this line doesn't override any proxy_buffering on set in a conf.d/file.conf
