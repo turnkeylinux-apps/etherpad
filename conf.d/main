@@ -55,7 +55,7 @@ su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 
 echo "Waiting for Etherpad to complete first run."
 
 while [[ "$(curl -Lk http://localhost)" = *"Unavailable"* ]]; do
-       sleep 10
+    sleep 1
 done
 
 echo "Etherpad first run complete. Now killing."
@@ -69,6 +69,7 @@ systemctl enable etherpad
 # Use purpose built Etherpad Nginx conf from overlay, rather than default
 # shared NodeJS conf
 rm /etc/nginx/sites-available/nodejs
-ln -s /etc/nginx/sites-available/etherpad /etc/nginx/sites-enabled/etherpad
-nginx -t
 rm /etc/nginx/sites-enabled/tkl-default
+ln -s /etc/nginx/sites-available/etherpad /etc/nginx/sites-enabled/etherpad
+# test nginx conf
+nginx -t
