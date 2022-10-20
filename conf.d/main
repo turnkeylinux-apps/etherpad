@@ -53,9 +53,8 @@ chown -R node:node $NODEAPP
 su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 2>&1 &"
 
 echo "Waiting for Etherpad to complete first run."
-
 while [[ "$(curl -Lk http://localhost)" = *"Unavailable"* ]]; do
-    sleep 1
+    sleep 10
 done
 
 echo "Etherpad first run complete. Now killing."
