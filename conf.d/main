@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+source /usr/local/bin/tkl_bashlib
+
 DB_NAME=etherpad
 DB_USER=etherpad
 DB_PASS=$(mcookie)
@@ -8,14 +10,7 @@ NODEAPP=/opt/etherpad-lite
 CONF=$NODEAPP/settings.json
 
 # setup mysql for etherpad
-service mysql start
-
-mysqladmin create $DB_NAME
-mysql --batch --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost identified by '$DB_PASS'; flush privileges;"
-mysql --batch --execute "ALTER DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;"
-
-# download etherpad and install dependencies
-[ "$FAB_HTTP_PROXY" ] && export HTTP_PROXY=$FAB_HTTP_PROXY
+mysql-setup $DB_NAME $DB_USER $DB_PASS
 
 # Etherpad "master" branch should be safe, but let's use the release
 ep_version=$(gh_releases ether/etherpad-lite | grep -v beta\|rc | tail -1)
@@ -24,15 +19,14 @@ git clone --depth=1 --branch=$ep_version https://github.com/ether/etherpad-lite.
 PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
          ep_font_color ep_webrtc ep_embedded_hyperlinks2"
 
-chown -R node:node $NODEAPP
 n 14
+n prune # remove alternate node versions
+chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
 su - node -c "cd $NODEAPP && npm install $PLUGINS"
 su - node -c "cd $NODEAPP && npm install argon2"
 su - node -c "cd $NODEAPP/src && npm install argon2 --save"
 su - node -c "cd $NODEAPP && ./src/bin/installDeps.sh"
-
-unset HTTP_PROXY
 
 # default TurnKey Etherpad settings.json (config file) in overlay
 mv /usr/local/src/tkl-etherpad.settings.example $CONF
@@ -45,30 +39,28 @@ chown -R node:node /var/log/etherpad
 echo -n $(mcookie) > $NODEAPP/APIKEY.txt
 echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
 echo -n "done" > $NODEAPP/src/.ep_initialized
+
 mkdir -p $NODEAPP/var
-
 chown -R node:node $NODEAPP
-
-# manually start etherpad the first time
-su - node -c "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 2>&1 &"
-
-echo "Waiting for Etherpad to complete first run."
-while [[ "$(curl -Lk http://localhost)" = *"Unavailable"* ]]; do
-    sleep 10
-done
-
-echo "Etherpad first run complete. Now killing."
-kill -s SIGTERM $(pgrep node)
-rm $NODEAPP/log.tmp
-
-service mysql stop
-
-systemctl enable etherpad
 
 # Use purpose built Etherpad Nginx conf from overlay, rather than default
 # shared NodeJS conf
 rm /etc/nginx/sites-available/nodejs
 rm /etc/nginx/sites-enabled/tkl-default
 ln -s /etc/nginx/sites-available/etherpad /etc/nginx/sites-enabled/etherpad
-# test nginx conf
-nginx -t
+service nginx start
+
+# manually start etherpad the first time
+su - node -c \
+    "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 2>&1 &"
+
+echo "Waiting for Etherpad to complete first run."
+# use function from tkl-bashlib to wait until server has started successfully
+wait_for_http_code
+
+echo "Etherpad first run complete. Now killing."
+kill -s SIGTERM $(pgrep node)
+rm $NODEAPP/log.tmp
+
+service mysql stop
+service nginx stop
