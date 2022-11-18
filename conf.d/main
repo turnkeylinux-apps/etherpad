@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-source /usr/local/bin/tkl_bashlib
+source /usr/local/src/tkl-bashlib/init.sh
 
 DB_NAME=etherpad
 DB_USER=etherpad
@@ -9,8 +9,8 @@ DB_PASS=$(mcookie)
 NODEAPP=/opt/etherpad-lite
 CONF=$NODEAPP/settings.json
 
-# setup mysql for etherpad
-mysql-setup $DB_NAME $DB_USER $DB_PASS
+# setup mysql for etherpad using tkl-bashlib
+tkl_mysql_setup $DB_NAME $DB_USER $DB_PASS
 
 # Etherpad "master" branch should be safe, but let's use the release
 ep_version=$(gh_releases ether/etherpad-lite | grep -v beta\|rc | tail -1)
@@ -19,7 +19,7 @@ git clone --depth=1 --branch=$ep_version https://github.com/ether/etherpad-lite.
 PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
          ep_font_color ep_webrtc ep_embedded_hyperlinks2"
 
-n 14
+n 14 # use nodejs v14.x
 n prune # remove alternate node versions
 chown -R node:node $NODEAPP
 su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
