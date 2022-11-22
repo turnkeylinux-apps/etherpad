@@ -1,6 +1,7 @@
 [Unit]
 Description=Etherpad Lite
-After=network.target
+After=network.target mariadb.service
+Wants=mariadb.service
 
 [Service]
 Type=simple 
