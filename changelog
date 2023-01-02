@@ -1,3 +1,13 @@
+turnkey-etherpad-17.1 (1) turnkey; urgency=low
+
+  * Updated all Debian packages to latest.
+    [ autopatched by buildtasks ]
+
+  * Patched bugfix release. Closes #1734.
+    [ autopatched by buildtasks ]
+
+ -- Jeremy Davis <jeremy@turnkeylinux.org>  Wed, 14 Dec 2022 03:19:49 +0000
+
 turnkey-etherpad-17.0 (1) turnkey; urgency=low
 
   * Updating etherpad and dependencies to tkldev v17
