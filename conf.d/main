@@ -19,14 +19,9 @@ git clone --depth=1 --branch=$ep_version https://github.com/ether/etherpad-lite.
 PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
          ep_font_color ep_webrtc ep_embedded_hyperlinks2"
 
-n 14 # use nodejs v14.x
+n lts # use latest nodejs lts (min supported is v18.18.2 as of etherpad 1.9.6)
 n prune # remove alternate node versions
 chown -R node:node $NODEAPP
-su node -lc "cd $NODEAPP && ./bin/installDeps.sh"
-su - node -c "cd $NODEAPP && npm install $PLUGINS"
-su - node -c "cd $NODEAPP && npm install argon2"
-su - node -c "cd $NODEAPP/src && npm install argon2 --save"
-su - node -c "cd $NODEAPP && ./src/bin/installDeps.sh"
 
 # default TurnKey Etherpad settings.json (config file) in overlay
 mv /usr/local/src/tkl-etherpad.settings.example $CONF
@@ -60,6 +55,9 @@ wait_for_http_code
 
 echo "Etherpad first run complete. Now killing."
 kill -s SIGTERM $(pgrep node)
+
+su - node -c "cd $NODEAPP && npm install --lockfile-version 1 --no-save --legacy-peer-deps $PLUGINS argon2"
+
 rm $NODEAPP/log.tmp
 
 service mysql stop
