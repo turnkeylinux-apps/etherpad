@@ -1,3 +1,16 @@
+turnkey-etherpad-19.0 (1) turnkey; urgency=low
+
+  * Install Etherpad from its maintained signed stable APT channel, currently
+    v3.3.3, with the supported Node.js 24 LTS runtime.
+
+  * Upgrade the appliance base to Debian 13 Trixie and retain MariaDB-backed
+    pad storage, HTTPS proxying, firstboot credentials and API access.
+
+  * Add focused runtime acceptance for administrator authentication, pad
+    create/write/read persistence, MariaDB state and signed update channels.
+
+ -- TurnKey GNU/Linux <admin@turnkeylinux.org>  Tue, 25 Aug 2026 04:00:00 +0000
+
 turnkey-etherpad-18.0 (1) turnkey; urgency=low
 
   * Updated Etherpad to v1.9.6 and Node to latest LTS version (currently

@@ -9,19 +9,18 @@ Option:
 import subprocess
 import sys
 import getopt
-import string
+import json
+import re
+from pathlib import Path
 
-
-
-from argon2 import PasswordHasher
-from  libinithooks.dialog_wrapper import Dialog
+from libinithooks.dialog_wrapper import Dialog
 
 
 def usage(s=None):
     if s:
-        print >> sys.stderr, "Error:", s
-    print >> sys.stderr, "Syntax: %s [options]" % sys.argv[0]
-    print >> sys.stderr, __doc__
+        print(f"Error: {s}", file=sys.stderr)
+    print(f"Syntax: {sys.argv[0]} [options]", file=sys.stderr)
+    print(__doc__, file=sys.stderr)
     sys.exit(1)
 
 def main():
@@ -44,13 +43,18 @@ def main():
             "Etherpad Password",
             "Enter new password for the Etherpad 'admin' account.")
 
-    ph = PasswordHasher()
-    hash_pass = ph.hash(password)
-
-    subprocess.run(["sed", "-i",
-                    f'/\"admin\":/,+1 s|\\(\"hash\":\\).*|\\1 \"{hash_pass}\",|',
-                    "/opt/etherpad-lite/settings.json"])
-    subprocess.run(["systemctl", "restart", "etherpad.service"])
+    path = Path("/etc/etherpad/settings.json")
+    settings = path.read_text()
+    encoded = json.dumps(password)
+    pattern = (r'("users"\s*:\s*\{.*?"admin"\s*:\s*\{.*?'
+               r'"password"\s*:\s*)"(?:[^"\\]|\\.)*"')
+    settings, count = re.subn(pattern,
+                              lambda match: match.group(1) + encoded,
+                              settings, count=1, flags=re.DOTALL)
+    if count != 1:
+        raise SystemExit("Etherpad administrator password setting is missing")
+    path.write_text(settings)
+    subprocess.run(["systemctl", "restart", "etherpad.service"], check=True)
 
 if __name__ == "__main__":
     main()

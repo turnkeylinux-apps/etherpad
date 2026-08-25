@@ -3,4 +3,6 @@
 #include <turnkey/mysql>
 
 tidy            /* improves output of exported pads and only adds 893 kB */
-python3-argon2  /* replaces bcrypt for hashing mechanism*/
+ca-certificates /* TLS trust for the signed upstream repositories */
+curl            /* fetches upstream repository signing keys */
+gnupg           /* verifies and installs repository signing keys */

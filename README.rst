@@ -10,18 +10,19 @@ sidebar to allow meta communication.
 This appliance includes all the standard features in `TurnKey Core`_,
 and on top of that:
 
-- EtherPad Lite configurations:
+- Etherpad configurations:
    
-   - Latest upstream version installed via git repository to
-     /opt/etherpad-lite
+   - The maintained upstream stable package is installed from Etherpad's
+     signed APT repository in ``/opt/etherpad``.
    - Pre-configured to use MySQL/MariaDB (recommended for production).
 
 - Node.js configurations:
    
-   - Includes NodeJS 14 and various other Node tools (n, npm, etc).
-   - The nginx web server is pre-configured to proxy to nodejs daemon,
+   - Includes the supported Node.js 24 LTS runtime from NodeSource's signed
+     repository.
+   - The nginx web server is pre-configured to proxy to the Etherpad service,
      with SSL support out of the box.
-   - Includes custom nodejs initscript for running node app as daemon.
+   - Etherpad runs under its upstream systemd service and dedicated account.
 
 - SSL support out of the box
 - Includes postfix MTA (bound to localhost) for sending of email.  Also
@@ -32,12 +33,12 @@ Note: This appliance does not include Abiword or Libre Office. One of these
 tools is required to export pads, but they add significant size to the
 image. They are easy to install, please see below.
 
-Install Abiword aand enable it in Etherpad::
+Install Abiword and enable it in Etherpad::
 
    apt update
    apt install abiword
    sed -i "s|\"abiword\" :.*|\"abiword\" : \"/usr/bin/abiword\",|" \
-      /opt/etherpad-lite/settings.json
+      /etc/etherpad/settings.json
    systemctl restart etherpad
 
 Or;
@@ -45,9 +46,9 @@ Or;
 Install Libre Office and enable it in Etherpad::
 
    apt update
-   apt install soffice-common
+   apt install libreoffice
    sed -i "s|\"soffice\" :.*|\"soffice\" : \"/usr/bin/soffice\",|" \
-      /opt/etherpad-lite/settings.json
+      /etc/etherpad/settings.json
    systemctl restart etherpad
 
 
@@ -56,6 +57,8 @@ Credentials *(passwords set at first boot)*
 -------------------------------------------
 
 -  Webmin, SSH, MySQL: username **root**
+
+-  Etherpad administration: username **admin**
 
 .. _Etherpad Lite: http://etherpad.org/
 .. _TurnKey Core: https://www.turnkeylinux.org/core

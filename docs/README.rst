@@ -20,12 +20,12 @@ This appliance does not include Abiword or Libre Office. One of these
 tools is required to export pads, but they add significant size to the
 image. They are easy to install, please see below.
 
-Install Abiword aand enable it in Etherpad::
+Install Abiword and enable it in Etherpad::
 
    apt update
    apt install abiword
    sed -i "s|\"abiword\" :.*|\"abiword\" : \"/usr/bin/abiword\",|" \
-      /opt/etherpad-lite/settings.json
+      /etc/etherpad/settings.json
    systemctl restart etherpad
 
 Or;
@@ -33,9 +33,9 @@ Or;
 Install Libre Office and enable it in Etherpad::
 
    apt update
-   apt install soffice-common
+   apt install libreoffice
    sed -i "s|\"soffice\" :.*|\"soffice\" : \"/usr/bin/soffice\",|" \
-      /opt/etherpad-lite/settings.json
+      /etc/etherpad/settings.json
    systemctl restart etherpad
 
 
@@ -44,6 +44,8 @@ Credentials *(passwords set at first boot)*
 -------------------------------------------
 
 -  Webmin, SSH, MySQL: username **root**
+
+-  Etherpad administration: username **admin**
 
 .. _Etherpad Lite: http://etherpad.org/
 .. _TurnKey Core: https://www.turnkeylinux.org/core
