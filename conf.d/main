@@ -56,6 +56,21 @@ apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     nodejs etherpad
 
+# The inherited nodejs-nginx profile uses n during its build. Remove that
+# unmanaged runtime so Etherpad executes the NodeSource package managed by APT.
+rm -f /usr/local/bin/{n,node,npm,npx,corepack}
+rm -rf /usr/local/n \
+       /usr/local/src/n \
+       /usr/local/include/node \
+       /usr/local/lib/node_modules/npm \
+       /usr/local/lib/node_modules/corepack \
+       /usr/local/share/doc/node \
+       /usr/local/share/man/man1/node.1
+rm -f /usr/local/etc/npmrc
+
+hash -r
+dpkg-query -S "$(readlink -f "$(command -v node)")" | grep -q '^nodejs:'
+
 node_major=$(node -p 'process.versions.node.split(".")[0]')
 (( node_major >= 24 ))
 dpkg-query -W etherpad >/dev/null

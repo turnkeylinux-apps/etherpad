@@ -27,9 +27,11 @@ grep -Eq '^turnkey-etherpad-19\.0' /etc/turnkey_version
 
 etherpad_version=$(dpkg-query -W -f='${Version}' etherpad)
 node_version=$(node --version)
+node_path=$(readlink -f "$(command -v node)")
 [[ $etherpad_version == 3.3.3-1 ]]
 [[ $node_version == v24.* ]]
 [[ $(node -p 'process.versions.node.split(".")[0]') -ge 24 ]]
+dpkg-query -S "$node_path" | grep -q '^nodejs:'
 dpkg-query -W etherpad nodejs mariadb-server nginx postfix >/dev/null
 [[ $(readlink -f /opt/etherpad/settings.json) == /etc/etherpad/settings.json ]]
 grep -q '"dbType": "mysql"' /etc/etherpad/settings.json
@@ -70,6 +72,10 @@ curl --insecure --fail --silent --show-error --get \
     --data-urlencode "padID=$pad_id" \
     "$base/api/1/getText" >"$response"
 grep -Fq "$pad_text" "$response"
+curl --insecure --fail --silent --show-error \
+    "$base/p/$pad_id" >"$response"
+grep -Fq "$pad_id" "$response"
+grep -Fq 'id="editorcontainer"' "$response"
 
 MYSQL_PWD=$db_password mariadb --user=root --batch --skip-column-names \
     etherpad --execute \
@@ -118,8 +124,8 @@ grep -Rq '^Suites: trixie' /etc/apt/sources.list.d
 cat >"$result" <<EOF
 package_source=Etherpad $etherpad_version from the official signed Etherpad stable APT channel; Node.js $node_version from the signed NodeSource Node 24 channel; MariaDB, nginx, Postfix and system integration from Debian Trixie
 installed_version=Etherpad $etherpad_version; Node.js $node_version; mariadb-server $(dpkg-query -W -f='${Version}' mariadb-server)
-runtime_checks=normal init; Etherpad, nginx, MariaDB and Postfix supervision; HTTPS health; firstboot administrator authentication; API pad create/write/read; direct MariaDB state; Etherpad restart and persisted pad read; Webmin HTTPS endpoint
-updater_command=apt-get update followed by apt-get upgrade
+runtime_checks=normal init; Etherpad, nginx, MariaDB and Postfix supervision; HTTPS health; firstboot administrator authentication; API pad create/write/read; HTTPS editor bootstrap and pad identity; direct MariaDB state; Etherpad restart and persisted pad read; Webmin HTTPS endpoint; package ownership of the active Node.js executable
+updater_command=apt-get update followed by apt-cache policy candidate verification
 updater_result=signed Etherpad and NodeSource metadata accepted; installed packages matched stable candidates; no package changed during the check
 updater_channel=https://etherpad.org/apt stable and https://deb.nodesource.com/node_24.x nodistro
 integrity_evidence=APT accepted repository metadata using pinned Etherpad and NodeSource key fingerprints; Trixie sources were active and no Bookworm source remained
