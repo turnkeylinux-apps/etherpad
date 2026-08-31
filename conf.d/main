@@ -5,60 +5,108 @@ source /usr/local/src/tkl-bashlib/init.sh
 DB_NAME=etherpad
 DB_USER=etherpad
 DB_PASS=$(mcookie)
+NODEAPP=/opt/etherpad
+CONF=/etc/etherpad/settings.json
 
-NODEAPP=/opt/etherpad-lite
-CONF=$NODEAPP/settings.json
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
 
-# setup mysql for etherpad using tkl-bashlib
-tkl_mysql_setup $DB_NAME $DB_USER $DB_PASS
+install -d -m 0755 /usr/share/keyrings
 
-# Etherpad "master" branch should be safe, but let's use the release
-ep_version=$(gh_releases ether/etherpad-lite | grep -v beta\|rc | tail -1)
-git clone --depth=1 --branch=$ep_version https://github.com/ether/etherpad-lite.git $NODEAPP
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+    -o "$tmpdir/nodesource.asc"
+nodesource_fpr=$(gpg --show-keys --with-colons "$tmpdir/nodesource.asc" |
+    awk -F: '$1 == "fpr" { print $10; exit }')
+[[ $nodesource_fpr == 6F71F525282841EEDAF851B42F59B5F99B1BE0B4 ]]
+gpg --dearmor --yes --output /usr/share/keyrings/nodesource.gpg \
+    "$tmpdir/nodesource.asc"
 
-PLUGINS="ep_hash_auth ep_headings2 ep_markdown ep_comments_page ep_align \
-         ep_font_color ep_webrtc ep_embedded_hyperlinks2"
+curl -fsSL https://etherpad.org/key.asc -o "$tmpdir/etherpad.asc"
+etherpad_fpr=$(gpg --show-keys --with-colons "$tmpdir/etherpad.asc" |
+    awk -F: '$1 == "fpr" { print $10; exit }')
+[[ $etherpad_fpr == 6953FA0C6431F30347D65B03AF0CD687D51A6E63 ]]
+gpg --dearmor --yes --output /usr/share/keyrings/etherpad.gpg \
+    "$tmpdir/etherpad.asc"
 
-n lts # use latest nodejs lts (min supported is v18.18.2 as of etherpad 1.9.6)
-n prune # remove alternate node versions
-chown -R node:node $NODEAPP
+cat >/etc/apt/sources.list.d/nodesource.sources <<'EOF'
+Types: deb
+URIs: https://deb.nodesource.com/node_24.x
+Suites: nodistro
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/nodesource.gpg
+EOF
 
-# default TurnKey Etherpad settings.json (config file) in overlay
-mv /usr/local/src/tkl-etherpad.settings.example $CONF
-sed -i "\|\"password\":|s|:.*|: \"$DB_PASS\",|" $CONF
+cat >/etc/apt/sources.list.d/etherpad.sources <<'EOF'
+Types: deb
+URIs: https://etherpad.org/apt
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/etherpad.gpg
+EOF
 
-mkdir -p /var/log/etherpad
-touch /var/log/etherpad/etherpad.log
-chown -R node:node /var/log/etherpad
+cat >/etc/apt/preferences.d/nodejs <<'EOF'
+Package: nodejs
+Pin: origin deb.nodesource.com
+Pin-Priority: 600
+EOF
 
-echo -n $(mcookie) > $NODEAPP/APIKEY.txt
-echo -n $(mcookie) > $NODEAPP/SESSIONKEY.txt
-echo -n "done" > $NODEAPP/src/.ep_initialized
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    nodejs etherpad
 
-mkdir -p $NODEAPP/var
-chown -R node:node $NODEAPP
+# The inherited nodejs-nginx profile uses n during its build. Remove that
+# unmanaged runtime so Etherpad executes the NodeSource package managed by APT.
+rm -f /usr/local/bin/{n,node,npm,npx,corepack}
+rm -rf /usr/local/n \
+       /usr/local/src/n \
+       /usr/local/include/node \
+       /usr/local/lib/node_modules/npm \
+       /usr/local/lib/node_modules/corepack \
+       /usr/local/share/doc/node \
+       /usr/local/share/man/man1/node.1
+rm -f /usr/local/etc/npmrc
 
-# Use purpose built Etherpad Nginx conf from overlay, rather than default
-# shared NodeJS conf
-rm /etc/nginx/sites-available/nodejs
-rm /etc/nginx/sites-enabled/tkl-default
+hash -r
+dpkg-query -S "$(readlink -f "$(command -v node)")" | grep -q '^nodejs:'
+
+node_major=$(node -p 'process.versions.node.split(".")[0]')
+(( node_major >= 24 ))
+dpkg-query -W etherpad >/dev/null
+
+tkl_mysql_setup "$DB_NAME" "$DB_USER" "$DB_PASS"
+
+# Retain upstream's current settings template across package updates. Change
+# only the database, proxy and account values needed for the appliance flow.
+perl -0pi -e 's@"title": "Etherpad"@"title": "TurnKey Etherpad"@' "$CONF"
+perl -0pi -e 's@"ip": "0\.0\.0\.0"@"ip": "127.0.0.1"@' "$CONF"
+perl -0pi -e 's@"trustProxy": false@"trustProxy": true@' "$CONF"
+perl -0pi -e 's@"dbType": "sqlite",\n  "dbSettings": \{.*?\n  \},@"dbType": "mysql",\n  "dbSettings": {\n    "user": "etherpad",\n    "host": "localhost",\n    "port": 3306,\n    "password": "UNSET_DB_PASS",\n    "database": "etherpad",\n    "charset": "utf8mb4"\n  },@s' "$CONF"
+perl -0pi -e 's@/\*\n  "users": \{.*?\n  \},\n  \*/@"users": {\n    "admin": {\n      "password": "UNSET_APP_PASS",\n      "is_admin": true\n    }\n  },@s' "$CONF"
+perl -0pi -e 's@Welcome to Etherpad!\\n\\n@Welcome to TurnKey Etherpad!\\n\\n@' "$CONF"
+
+grep -q '"dbType": "mysql"' "$CONF"
+grep -q '"password": "UNSET_DB_PASS"' "$CONF"
+grep -q '"password": "UNSET_APP_PASS"' "$CONF"
+
+sed -i "s/UNSET_DB_PASS/$DB_PASS/" "$CONF"
+chown etherpad:etherpad "$CONF"
+chmod 0660 "$CONF"
+
+printf '%s' "$(mcookie)" >"$NODEAPP/APIKEY.txt"
+printf '%s' "$(mcookie)" >"$NODEAPP/SESSIONKEY.txt"
+chown root:etherpad "$NODEAPP/APIKEY.txt" "$NODEAPP/SESSIONKEY.txt"
+chmod 0640 "$NODEAPP/APIKEY.txt" "$NODEAPP/SESSIONKEY.txt"
+
+cat >>/etc/default/etherpad <<'EOF'
+AUTHENTICATION_METHOD=apikey
+EOF
+
+rm -f /etc/nginx/sites-available/nodejs \
+      /etc/nginx/sites-enabled/nodejs \
+      /etc/nginx/sites-enabled/tkl-default
 ln -s /etc/nginx/sites-available/etherpad /etc/nginx/sites-enabled/etherpad
-service nginx start
 
-# manually start etherpad the first time
-su - node -c \
-    "cd $NODEAPP && NODE_ENV=production ./bin/run.sh >$NODEAPP/log.tmp 2>&1 &"
-
-echo "Waiting for Etherpad to complete first run."
-# use function from tkl-bashlib to wait until server has started successfully
-wait_for_http_code
-
-echo "Etherpad first run complete. Now killing."
-kill -s SIGTERM $(pgrep node)
-
-su - node -c "cd $NODEAPP && npm install --lockfile-version 1 --no-save --legacy-peer-deps $PLUGINS argon2"
-
-rm $NODEAPP/log.tmp
-
+systemctl enable etherpad.service
 service mysql stop
-service nginx stop

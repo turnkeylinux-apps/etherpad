@@ -6,3 +6,6 @@
 [ -e $INITHOOKS_CONF ] && . $INITHOOKS_CONF
 $INITHOOKS_PATH/bin/etherpad.py --pass="$APP_PASS"
 
+# The TLS certificate hook only restarts services that were already active.
+# Ensure Nginx starts with the completed certificate and key pair.
+systemctl restart --quiet nginx.service
